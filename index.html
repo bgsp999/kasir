@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Kalkulator Penjualan Modern</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: url("https://www.pinhome.id/blog/wp-content/uploads/2024/02/dapur-ala-cafe.jpg?w=128&fm=avif") no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+    }
+    .overlay {
+      background: rgba(0,0,0,0.65);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 25px;
+      border-radius: 15px;
+      background: rgb(188, 141, 0);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+      backdrop-filter: blur(6px);
+      transition: 0.3s;
+    }
+    .container:hover {
+      transform: scale(1.01);
+    }
+    h2, h3 {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      border-radius: 8px;
+      border: none;
+      font-size: 15px;
+    }
+    input, select {
+      background: #fff;
+      color: #333;
+    }
+    button {
+      background: #da9b3b;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #ff1744;
+      transform: translateY(-2px);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      background: rgba(255,255,255,0.9);
+      color: #333;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #b71c1c;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+    .rekap {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.9);
+      color: #b71c1c;
+      font-weight: bold;
+      font-size: 16px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <div class="container">
+      <h2>📊 Kalkulator Penjualan</h2>
+      
+      <label>Nama Barang:</label>
+      <select id="barang" onchange="updateHarga()">
+        <option value="">-- Pilih Barang --</option>
+        <option value="Es Teh">Es Teh</option>
+        <option value="Kopi">Kopi</option>
+        <option value="Nutrisari">Nutrisari</option>
+      </select>
+      
+      <label>Harga Barang (Rp):</label>
+      <input type="number" id="harga" readonly>
+      
+      <label>Jumlah:</label>
+      <input type="number" id="jumlah" placeholder="Masukkan jumlah">
+      
+      <label>Metode Pembayaran:</label>
+      <select id="metode">
+        <option value="cash">Cash</option>
+        <option value="qris">QRIS</option>
+      </select>
+      
+      <br>
+      <button onclick="tambah()">+ Tambah ke Riwayat</button>
+      <button onclick="lihatRekap()">📑 Lihat Rekap</button>
+      
+      <h3>Riwayat Pembelian - Cash</h3>
+      <table id="riwayatCash">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Nama Barang</th>
+            <th>Harga</th>
+            <th>Jumlah</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <h3>Riwayat Pembelian - QRIS</h3>
+      <table id="riwayatQris">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Nama Barang</th>
+            <th>Harga</th>
+            <th>Jumlah</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      
+      <div class="rekap" id="rekap">Belum ada rekap penjualan.</div>
+    </div>
+  </div>
+
+  <script>
+    let transaksi = [];
+    const daftarHarga = {
+      "Es Teh": 3000,
+      "Kopi": 5000,
+      "Nutrisari": 4000
+    };
+
+    function updateHarga() {
+      let barang = document.getElementById("barang").value;
+      document.getElementById("harga").value = daftarHarga[barang] || "";
+    }
+
+    function tambah() {
+      let nama = document.getElementById("barang").value;
+      let harga = parseFloat(document.getElementById("harga").value) || 0;
+      let jumlah = parseInt(document.getElementById("jumlah").value) || 0;
+      let metode = document.getElementById("metode").value;
+      let total = harga * jumlah;
+
+      if (nama === "" || harga <= 0 || jumlah <= 0) {
+        alert("⚠️ Mohon isi data dengan benar!");
+        return;
+      }
+
+      transaksi.push({ nama, harga, jumlah, total, metode });
+      tampilkanRiwayat();
+
+      // reset input
+      document.getElementById("barang").value = "";
+      document.getElementById("harga").value = "";
+      document.getElementById("jumlah").value = "";
+    }
+
+    function tampilkanRiwayat() {
+      let tbodyCash = document.getElementById("riwayatCash").getElementsByTagName("tbody")[0];
+      let tbodyQris = document.getElementById("riwayatQris").getElementsByTagName("tbody")[0];
+      
+      tbodyCash.innerHTML = "";
+      tbodyQris.innerHTML = "";
+
+      let nomorCash = 1;
+      let nomorQris = 1;
+
+      transaksi.forEach((t) => {
+        let row = `<tr>
+          <td>${t.metode === "cash" ? nomorCash++ : nomorQris++}</td>
+          <td>${t.nama}</td>
+          <td>Rp ${t.harga.toLocaleString("id-ID")}</td>
+          <td>${t.jumlah}</td>
+          <td>Rp ${t.total.toLocaleString("id-ID")}</td>
+        </tr>`;
+        
+        if (t.metode === "cash") {
+          tbodyCash.innerHTML += row;
+        } else {
+          tbodyQris.innerHTML += row;
+        }
+      });
+    }
+
+    function lihatRekap() {
+      let totalCash = 0;
+      let totalQris = 0;
+      let totalSemua = 0;
+
+      transaksi.forEach(t => {
+        if (t.metode === "cash") {
+          totalCash += t.total;
+        } else {
+          totalQris += t.total;
+        }
+        totalSemua += t.total;
+      });
+
+      document.getElementById("rekap").innerHTML = `
+        <h3>💰 Rekap Penjualan</h3>
+        Total Cash: Rp ${totalCash.toLocaleString("id-ID")} <br>
+        Total QRIS: Rp ${totalQris.toLocaleString("id-ID")} <br>
+        <hr>
+        Jumlah Semua Penjualan: <b>Rp ${totalSemua.toLocaleString("id-ID")}</b>
+      `;
+    }
+  </script>
+</body>
+</html>
